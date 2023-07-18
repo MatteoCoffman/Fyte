@@ -1,13 +1,79 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, ScrollView, View, Text, StyleSheet } from "react-native";
+import {
+  SafeAreaView,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  TextInput,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import { API_KEY } from "@env";
 import { Picker } from "@react-native-picker/picker";
+import { Button } from "react-native-elements";
 
 export default function App() {
   const [odds, setOdds] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedBookmaker, setSelectedBookmaker] = useState(null);
+  const [selectedFighter, setSelectedFighter] = useState(null);
+  const [betAmount, setBetAmount] = useState("");
+  const [winAmount, setWinAmount] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [betData, setBetData] = useState([]);
+
+  const handleFighterSelection = (fighter) => {
+    setSelectedFighter(fighter);
+    setBetAmount("");
+    setWinAmount("");
+    setShowModal(true);
+  };
+
+  const handleBetAmountChange = (value) => {
+    // Validate input (only numbers)
+    if (/^\d*$/.test(value)) {
+      setBetAmount(value);
+      // Calculate win amount based on the selected fighter's odds and entered bet amount
+      const odds = selectedFighter?.price;
+      if (odds) {
+        const win = value * (odds > 0 ? odds / 100 : 100 / -odds);
+        setWinAmount(win.toFixed(2));
+      }
+    }
+  };
+
+  const handleWinAmountChange = (value) => {
+    // Validate input (only numbers)
+    if (/^\d*$/.test(value)) {
+      setWinAmount(value);
+      // Calculate bet amount based on the selected fighter's odds and entered win amount
+      const odds = selectedFighter?.price;
+      if (odds) {
+        const bet = value / (odds > 0 ? odds / 100 : 100 / -odds);
+        setBetAmount(bet.toFixed(2));
+      }
+    }
+  };
+
+  const handleModalSubmit = () => {
+    // Save the selected fighter and bet/win amounts
+    const newBet = {
+      fighter: selectedFighter,
+      betAmount,
+      winAmount,
+    };
+    setBetData((prevData) => [...prevData, newBet]);
+
+    // Close the modal and reset the state
+    setShowModal(false);
+    setSelectedFighter(null);
+    setBetAmount("");
+    setWinAmount("");
+  };
 
   useEffect(() => {
     const fetchOdds = async () => {
@@ -41,13 +107,13 @@ export default function App() {
     fetchOdds();
   }, [selectedBookmaker]);
 
-  const bookmakers = [
-    ...new Set(
-      odds
-        .map((game) => game.bookmakers.map((bookmaker) => bookmaker.title))
-        .flat()
-    ),
-  ];
+  const bookmakers = Array.from(
+    new Set(
+      odds.flatMap((game) =>
+        game.bookmakers.map((bookmaker) => bookmaker.title)
+      )
+    )
+  );
 
   if (isLoading) {
     return (
@@ -73,7 +139,7 @@ export default function App() {
           onValueChange={(itemValue) => setSelectedBookmaker(itemValue)}
         >
           <Picker.Item label="Select bookmaker" value="" />
-          {Array.from(new Set(bookmakers)).map((bookmaker, index) => (
+          {bookmakers.map((bookmaker, index) => (
             <Picker.Item key={index} label={bookmaker} value={bookmaker} />
           ))}
         </Picker>
@@ -94,9 +160,15 @@ export default function App() {
                   {bookmaker.markets.map((market, index) => (
                     <View key={index} style={styles.market}>
                       {market.outcomes.map((outcome, index) => (
-                        <Text key={index}>
-                          {outcome.name}: {outcome.price}
-                        </Text>
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.outcomeButton}
+                          onPress={() => handleFighterSelection(outcome)}
+                        >
+                          <Text>
+                            {outcome.name}: {outcome.price}
+                          </Text>
+                        </TouchableOpacity>
                       ))}
                     </View>
                   ))}
@@ -104,6 +176,42 @@ export default function App() {
               ))}
           </View>
         ))}
+        <Modal visible={showModal} transparent animationType="slide">
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.modalOverlay} />
+          </TouchableWithoutFeedback>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.selectedFighterText}>
+                Selected Fighter: {selectedFighter?.name}
+              </Text>
+              <View style={styles.inputField}>
+                <Text>Bet:</Text>
+                <TextInput
+                  value={betAmount}
+                  onChangeText={handleBetAmountChange}
+                  keyboardType="numeric"
+                  style={styles.input}
+                />
+              </View>
+              <View style={styles.inputField}>
+                <Text>Win:</Text>
+                <TextInput
+                  value={winAmount}
+                  onChangeText={handleWinAmountChange}
+                  keyboardType="numeric"
+                  style={styles.input}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleModalSubmit}
+              >
+                <Text style={styles.submitButtonText}>Submit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </SafeAreaView>
   );
@@ -143,5 +251,55 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 10,
     backgroundColor: "#d9d9d9",
+  },
+  outcomeButton: {
+    marginBottom: 5,
+    padding: 10,
+    backgroundColor: "#ccc",
+    borderRadius: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 4,
+  },
+  selectedFighterText: {
+    marginBottom: 10,
+    fontWeight: "bold",
+  },
+  inputField: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  input: {
+    flex: 1,
+    marginLeft: 10,
+    borderWidth: 1,
+    borderColor: "#000",
+    borderRadius: 5,
+    padding: 5,
+  },
+  submitButton: {
+    marginTop: 20,
+    alignSelf: "center",
+    backgroundColor: "green",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 4,
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
