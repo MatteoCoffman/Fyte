@@ -12,14 +12,13 @@ import OutcomeButton from "../components/OutcomeButton";
 import ModalComponent from "../components/ModalComponent";
 import { Picker } from "@react-native-picker/picker";
 
-const MainScreen = () => {
+const MainScreen = ({ betData, setBetData }) => {
   const [odds, setOdds] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedBookmaker, setSelectedBookmaker] = useState(null);
   const [selectedFighter, setSelectedFighter] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [betData, setBetData] = useState([]);
 
   const handleFighterSelection = (fighter) => {
     setSelectedFighter(fighter);
@@ -66,22 +65,6 @@ const MainScreen = () => {
     )
   );
 
-  if (isLoading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text>Loading...</Text>
-      </SafeAreaView>
-    );
-  }
-
-  if (error) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text>Error: {error}</Text>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -115,6 +98,8 @@ const MainScreen = () => {
                           key={index}
                           outcome={outcome}
                           handleFighterSelection={handleFighterSelection}
+                          betData={betData}
+                          setBetData={setBetData}
                         />
                       ))}
                     </View>
