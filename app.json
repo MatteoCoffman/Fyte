@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "mlcoffman",
     "name": "Fyte",
     "slug": "Fyte",
     "version": "1.0.0",
@@ -13,16 +14,29 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mlcoffman.Fyte"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.mlcoffman.Fyte"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0a9d1245-cfaf-41e2-b263-71987a55e2b5"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0a9d1245-cfaf-41e2-b263-71987a55e2b5"
     }
   }
 }
