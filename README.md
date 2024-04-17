@@ -38,4 +38,4 @@ Contributions are welcome! Here's how you can contribute:
 ## Contact
 Matteo Coffman – [matteo.coffman@gmail.com](mailto:matteo.coffman@gmail.com)
 
-Project Link: [https://github.com/MatteoCoffman/fyte-app](https://github.com/MatteoCoffman/fyte-app)
+Project Link: [https://github.com/MatteoCoffman/fyte-app](https://github.com/MatteoCoffman/Fyte)
