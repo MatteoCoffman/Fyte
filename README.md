@@ -13,7 +13,7 @@ To use Fyte via Expo Go, follow these simple steps:
 1. **Download Expo Go**: Install the Expo Go application on your mobile device from the App Store or Google Play.
 2. **Scan the QR Code**: Open Expo Go and scan this QR code to instantly launch the Fyte app:
 
-![QR Code](/fyte/assets/fyte_qr_code.png)
+![QR Code](/assets/fyte_qr_code.png)
 
 ## Usage
 To get a feel for how Fyte works or to test changes during development:
